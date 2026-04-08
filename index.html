@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深夜电台 98.7</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="radio-container">
+        <!-- 电台外壳 -->
+        <div class="radio-cabinet">
+            <!-- 顶部频率显示 -->
+            <div class="frequency-display">
+                <span class="frequency-label">FM</span>
+                <span class="frequency-value" id="frequency">98.7</span>
+                <span class="frequency-unit">MHz</span>
+            </div>
+
+            <!-- 刻度盘 -->
+            <div class="dial-panel">
+                <div class="dial-scale">
+                    <span class="dial-mark">88</span>
+                    <span class="dial-mark">92</span>
+                    <span class="dial-mark">96</span>
+                    <span class="dial-mark active">98</span>
+                    <span class="dial-mark">100</span>
+                    <span class="dial-mark">104</span>
+                    <span class="dial-mark">108</span>
+                </div>
+                <div class="dial-needle" id="dialNeedle"></div>
+            </div>
+
+            <!-- 频道显示屏 -->
+            <div class="channel-display" id="channelDisplay">
+                <div class="static-overlay" id="staticOverlay"></div>
+                <div class="channel-content" id="channelContent">
+                    <div class="broadcast-info">
+                        <span class="broadcast-title">等待调频...</span>
+                        <span class="broadcast-subtitle"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <!-- 调频旋钮 -->
+                <div class="knob-container">
+                    <div class="knob" id="tuningKnob">
+                        <div class="knob-indicator"></div>
+                    </div>
+                    <span class="knob-label">调频</span>
+                </div>
+
+                <!-- 音量旋钮 -->
+                <div class="knob-container">
+                    <div class="knob" id="volumeKnob">
+                        <div class="knob-indicator"></div>
+                    </div>
+                    <span class="knob-label">音量</span>
+                </div>
+
+                <!-- 电源指示灯 -->
+                <div class="power-indicator">
+                    <div class="power-led" id="powerLed"></div>
+                    <span class="power-label">电源</span>
+                </div>
+            </div>
+
+            <!-- 扬声器网格 -->
+            <div class="speaker-grille">
+                <div class="speaker-slot"></div>
+                <div class="speaker-slot"></div>
+                <div class="speaker-slot"></div>
+                <div class="speaker-slot"></div>
+                <div class="speaker-slot"></div>
+            </div>
+
+            <!-- 电台信息栏 -->
+            <div class="radio-info-bar">
+                <span class="radio-brand">深夜电台 98.7</span>
+                <span class="radio-tagline">当声音开始说谎，你还能相信谁？</span>
+            </div>
+        </div>
+
+        <!-- 静电噪音层 -->
+        <div class="noise-overlay" id="noiseOverlay"></div>
+
+        <!-- 解密内容面板（隐藏） -->
+        <div class="secret-panel" id="secretPanel" style="display: none;">
+            <div class="secret-content">
+                <h2>隐藏广播 #001</h2>
+                <p>你找到我了。</p>
+                <p class="cipher-text">7-2-11-5-18-19</p>
+                <p class="hint">答案就在你身边...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 调频时的提示 -->
+    <div class="tuning-hint" id="tuningHint">旋转旋钮来调频...</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
