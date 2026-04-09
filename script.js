@@ -19,7 +19,7 @@ class Radio {
             98.7: { title: '奇怪的声音', subtitle: '欢迎来到深夜电台' },
             101.3: { title: '杂音', subtitle: '信号不稳定...' },
             104.7: { title: '另一个频率', subtitle: '这里也有秘密' },
-            107.5: { title: '电码？', subtitle: '什么都没有' }
+            107.5: { title: '找到了？！', subtitle: '' }
         };
 
         // 104.7语音内容
@@ -160,8 +160,8 @@ class Radio {
             this.elements.channel98Audio.play().catch(() => {});
             return;
         } else if (freq === 107.5) {
-            this.elements.morseAudio.volume = vol;
-            this.elements.morseAudio.play().catch(() => {});
+            // 107.5 跳转生日网站
+            this.showBirthdayLink();
         } else if (freq === 104.7) {
             // 104.7播放语音（人声加大）
             window.voiceGenerator.speak(this.channel104Voice, Math.min(vol * 1.5, 1));
@@ -170,8 +170,19 @@ class Radio {
         }
 
         // 所有频道都叠加背景杂音
-        this.elements.bgnoiseAudio.volume = vol * 0.5;
-        this.elements.bgnoiseAudio.play().catch(() => {});
+        if (freq !== 107.5) {
+            this.elements.bgnoiseAudio.volume = vol * 0.5;
+            this.elements.bgnoiseAudio.play().catch(() => {});
+        }
+    }
+
+    showBirthdayLink() {
+        // 显示跳转提示
+        this.elements.channelContent.innerHTML = `
+            <div class="birthday-link" onclick="window.open('https://gouqi987-eng.github.io/beihai-birthday/', '_blank')">
+                <h2>找到了？！</h2>
+            </div>
+        `;
     }
 
     stopAllAudio() {
