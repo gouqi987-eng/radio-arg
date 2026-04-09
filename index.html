@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>深夜电台 98.7</title>
+    <title>sea76-42</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -44,22 +44,6 @@
 
             <!-- 控制面板 -->
             <div class="control-panel">
-                <!-- 调频旋钮 -->
-                <div class="knob-container">
-                    <div class="knob" id="tuningKnob">
-                        <div class="knob-indicator"></div>
-                    </div>
-                    <span class="knob-label">调频</span>
-                </div>
-
-                <!-- 音量旋钮 -->
-                <div class="knob-container">
-                    <div class="knob" id="volumeKnob">
-                        <div class="knob-indicator"></div>
-                    </div>
-                    <span class="knob-label">音量</span>
-                </div>
-
                 <!-- 电源指示灯 -->
                 <div class="power-indicator">
                     <div class="power-led" id="powerLed"></div>
@@ -78,23 +62,13 @@
 
             <!-- 电台信息栏 -->
             <div class="radio-info-bar">
-                <span class="radio-brand">深夜电台 98.7</span>
+                <span class="radio-brand">sea76-42</span>
                 <span class="radio-tagline">当声音开始说谎，你还能相信谁？</span>
             </div>
         </div>
 
         <!-- 静电噪音层 -->
         <div class="noise-overlay" id="noiseOverlay"></div>
-
-        <!-- 解密内容面板（隐藏） -->
-        <div class="secret-panel" id="secretPanel" style="display: none;">
-            <div class="secret-content">
-                <h2>隐藏广播 #001</h2>
-                <p>你找到我了。</p>
-                <p class="cipher-text">7-2-11-5-18-19</p>
-                <p class="hint">答案就在你身边...</p>
-            </div>
-        </div>
     </div>
 
     <!-- 调频时的提示 -->
@@ -116,7 +90,14 @@
     <audio id="morseAudio">
         <source src="morse.wav" type="audio/wav">
     </audio>
+    <audio id="channel98Audio" loop>
+        <source src="channel98.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="bgnoiseAudio" loop>
+        <source src="bgnoise.mp3" type="audio/mpeg">
+    </audio>
 
     <script src="script.js"></script>
+    <script src="voice-generator.js"></script>
 </body>
 </html>

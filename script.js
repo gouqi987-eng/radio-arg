@@ -16,14 +16,17 @@ class Radio {
             90.5: { title: '有人想和你聊聊', subtitle: '来自很久以前的声音' },
             93.2: { title: '一首很熟悉的歌', subtitle: '来自很久以前的声音' },
             96.8: { title: '一首俄语反战歌曲', subtitle: '无法识别的信号' },
-            98.7: { title: '找到你了', subtitle: '欢迎来到深夜电台' },
+            98.7: { title: '奇怪的声音', subtitle: '欢迎来到深夜电台' },
             101.3: { title: '杂音', subtitle: '信号不稳定...' },
             104.7: { title: '另一个频率', subtitle: '这里也有秘密' },
-            107.5: { title: '静默', subtitle: '什么都没有' }
+            107.5: { title: '电码？', subtitle: '什么都没有' }
         };
 
+        // 104.7语音内容
+        this.channel104Voice = 'She is not mine. Stay away from her.';
+
         // 关键频率（解密点）
-        this.secretFrequency = 98.7;
+        this.secretFrequency = 107.5;
 
         // DOM元素
         this.elements = {
@@ -32,8 +35,6 @@ class Radio {
             dialNeedle: document.getElementById('dialNeedle'),
             channelDisplay: document.getElementById('channelDisplay'),
             channelContent: document.getElementById('channelContent'),
-            tuningKnob: document.getElementById('tuningKnob'),
-            volumeKnob: document.getElementById('volumeKnob'),
             noiseOverlay: document.getElementById('noiseOverlay'),
             secretPanel: document.getElementById('secretPanel'),
             tuningHint: document.getElementById('tuningHint'),
@@ -42,7 +43,9 @@ class Radio {
             channelAudio: document.getElementById('channelAudio'),
             realityAudio: document.getElementById('realityAudio'),
             lubeAudio: document.getElementById('lubeAudio'),
-            morseAudio: document.getElementById('morseAudio')
+            morseAudio: document.getElementById('morseAudio'),
+            channel98Audio: document.getElementById('channel98Audio'),
+            bgnoiseAudio: document.getElementById('bgnoiseAudio')
         };
 
         this.init();
@@ -55,16 +58,9 @@ class Radio {
     }
 
     bindEvents() {
-        // 开机/调频旋钮 - 点击开机，拖动调频
-        this.elements.tuningKnob.addEventListener('mousedown', (e) => this.startTuning(e));
-        this.elements.tuningKnob.addEventListener('touchstart', (e) => this.startTuning(e));
-
-        // 音量旋钮
-        this.elements.volumeKnob.addEventListener('mousedown', (e) => this.adjustVolume(e));
-        this.elements.volumeKnob.addEventListener('touchstart', (e) => this.adjustVolume(e));
-
-        // 点击频道显示屏也可以开机
-        this.elements.channelDisplay.addEventListener('click', () => this.togglePower());
+        // 点击屏幕开机，左右滑动调频
+        document.addEventListener('mousedown', (e) => this.startTuning(e));
+        document.addEventListener('touchstart', (e) => this.startTuning(e));
 
         // 全局鼠标/触摸移动和抬起
         document.addEventListener('mousemove', (e) => this.onDrag(e));
@@ -86,12 +82,15 @@ class Radio {
             this.elements.realityAudio.volume = 0;
             this.elements.lubeAudio.volume = 0;
             this.elements.morseAudio.volume = 0;
+            this.elements.channel98Audio.volume = 0;
+            this.elements.bgnoiseAudio.volume = 0;
             this.updateChannel();
         } else {
             this.elements.powerLed.classList.remove('on');
             this.elements.channelDisplay.classList.add('static-strong');
             this.elements.tuningHint.classList.remove('visible');
             this.elements.audio.pause();
+            this.elements.bgnoiseAudio.pause();
             this.elements.channelContent.innerHTML = `
                 <div class="broadcast-info">
                     <span class="broadcast-title">等待调频...</span>
@@ -106,18 +105,20 @@ class Radio {
             this.togglePower();
         }
         this.isTuning = true;
-        this.tuningStartY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        // 左右滑动，所以用clientX
+        this.tuningStartX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
         this.tuningStartFreq = this.currentFrequency;
         document.body.classList.add('tuning');
-        this.elements.tuningHint.textContent = '旋转调频中...';
+        this.elements.tuningHint.textContent = '左右滑动调频...';
     }
 
     onDrag(e) {
         if (!this.isTuning) return;
 
-        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-        const deltaY = this.tuningStartY - clientY;
-        const freqDelta = deltaY * 0.05; // 灵敏度
+        // 左右滑动，所以用clientX
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const deltaX = clientX - this.tuningStartX;
+        const freqDelta = deltaX * 0.05; // 灵敏度
 
         this.currentFrequency = Math.max(88, Math.min(108, this.tuningStartFreq + freqDelta));
         this.updateFrequency();
@@ -133,46 +134,17 @@ class Radio {
         }
     }
 
-    adjustVolume(e) {
-        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-
-        // 上下滑动调整音量
-        const delta = this.tuningStartY - clientY;
-        this.volume = Math.max(0, Math.min(100, this.volume + delta * 0.5));
-
-        // 实际设置音量
-        if (this.elements.audio) {
-            this.elements.audio.volume = this.volume / 100;
-        }
-        if (this.elements.channelAudio) {
-            this.elements.channelAudio.volume = this.volume / 100;
-        }
-        if (this.elements.realityAudio) {
-            this.elements.realityAudio.volume = this.volume / 100;
-        }
-        if (this.elements.lubeAudio) {
-            this.elements.lubeAudio.volume = this.volume / 100;
-        }
-        if (this.elements.morseAudio) {
-            this.elements.morseAudio.volume = this.volume / 100;
-        }
-
-        // 音量影响静电强度
-        const noiseLevel = this.volume > 70 ? 'static-weak' : (this.volume > 30 ? 'static-medium' : 'static-strong');
-        this.elements.channelDisplay.classList.remove('static-strong', 'static-medium', 'static-weak');
-        if (!this.isPoweredOn) {
-            this.elements.channelDisplay.classList.add(noiseLevel);
-        }
-
-        this.tuningStartY = clientY;
-    }
-
     setChannelAudio(freq, vol) {
+        // 重置所有音频
         this.elements.audio.volume = 0;
         this.elements.channelAudio.volume = 0;
         this.elements.realityAudio.volume = 0;
         this.elements.lubeAudio.volume = 0;
+        this.elements.morseAudio.volume = 0;
+        this.elements.channel98Audio.volume = 0;
+        this.elements.bgnoiseAudio.volume = 0;
 
+        // 根据频道播放对应音频
         if (freq === 90.5) {
             this.elements.channelAudio.volume = vol;
             this.elements.channelAudio.play().catch(() => {});
@@ -183,12 +155,38 @@ class Radio {
             this.elements.lubeAudio.volume = vol;
             this.elements.lubeAudio.play().catch(() => {});
         } else if (freq === 98.7) {
-            // 隐藏频道播放莫尔斯电码，不弹出提示
+            // 98.7播放指定音频
+            this.elements.channel98Audio.volume = vol;
+            this.elements.channel98Audio.play().catch(() => {});
+            return;
+        } else if (freq === 107.5) {
             this.elements.morseAudio.volume = vol;
             this.elements.morseAudio.play().catch(() => {});
+        } else if (freq === 104.7) {
+            // 104.7播放语音（人声加大）
+            window.voiceGenerator.speak(this.channel104Voice, Math.min(vol * 1.5, 1));
         } else {
             this.elements.audio.volume = vol;
         }
+
+        // 所有频道都叠加背景杂音
+        this.elements.bgnoiseAudio.volume = vol * 0.5;
+        this.elements.bgnoiseAudio.play().catch(() => {});
+    }
+
+    stopAllAudio() {
+        this.elements.audio.pause();
+        this.elements.channelAudio.pause();
+        this.elements.realityAudio.pause();
+        this.elements.lubeAudio.pause();
+        this.elements.morseAudio.pause();
+        this.elements.audio.currentTime = 0;
+        this.elements.channelAudio.currentTime = 0;
+        this.elements.realityAudio.currentTime = 0;
+        this.elements.lubeAudio.currentTime = 0;
+        this.elements.morseAudio.currentTime = 0;
+        this.elements.channel98Audio.currentTime = 0;
+        this.elements.bgnoiseAudio.currentTime = 0;
     }
 
     updateFrequency() {
@@ -225,7 +223,7 @@ class Radio {
 
         // 根据距离决定信号强度
         if (dist < 0.3) {
-            // 信号很强 - 音频清晰
+            // 信号很强 - 音频清晰，但有轻微背景杂音
             this.elements.channelContent.innerHTML = `
                 <div class="broadcast-info">
                     <span class="broadcast-title">${channel.title}</span>
@@ -234,8 +232,9 @@ class Radio {
             `;
             const vol = (this.volume / 100) * (1 - dist * 0.5);
             this.setChannelAudio(closestFreq, vol);
+            this.elements.channelDisplay.classList.add('signal-strong');
         } else if (dist < 1.5) {
-            // 信号弱，有杂音 - 音量降低
+            // 信号弱，有杂音 - 音量降低，杂音增强
             this.elements.channelContent.innerHTML = `
                 <div class="broadcast-info" style="opacity: 0.6">
                     <span class="broadcast-title">${channel.title}</span>
@@ -244,8 +243,10 @@ class Radio {
             `;
             const vol = (this.volume / 100) * 0.4;
             this.setChannelAudio(closestFreq, vol);
+            this.elements.channelDisplay.classList.add('signal-weak');
+            this.elements.channelDisplay.classList.remove('signal-strong');
         } else {
-            // 几乎只有静电 - 几乎无声
+            // 几乎只有静电 - 几乎无声，强杂音
             this.elements.channelContent.innerHTML = `
                 <div class="broadcast-info" style="opacity: 0.3">
                     <span class="broadcast-title">. . . . .</span>
@@ -253,6 +254,8 @@ class Radio {
                 </div>
             `;
             this.setChannelAudio(closestFreq, (this.volume / 100) * 0.1);
+            this.elements.channelDisplay.classList.add('signal-weak');
+            this.elements.channelDisplay.classList.remove('signal-strong');
         }
 
         // 更新刻度盘高亮
